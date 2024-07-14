@@ -8,15 +8,17 @@ import {
   getBuilderSearchParams,
 } from '@builder.io/sdk-qwik';
 
-// Define Builder's public API key and content model.
-// TO DO: Replace with your Public API Key
-export const BUILDER_PUBLIC_API_KEY = process.env.PUBLIC_BUILDER_API_KEY || '';
+export interface Env {
+  PUBLIC_BUILDER_API_KEY: string;
+}
+
 export const BUILDER_MODEL = 'page';
 
-// Define a route loader function that loads
-// content from Builder based on the URL.
-export const useBuilderContent = routeLoader$(async ({ url }) => {
-  // Fetch content for the specified model using the API key.
+
+export const useBuilderContent = routeLoader$(async ({ env, url }) => {
+  // access env variable in cloudflare settings using routeLoader only  
+  const BUILDER_PUBLIC_API_KEY = env.get('PUBLIC_BUILDER_API_KEY') || '';
+
   const builderContent = await fetchOneEntry({
     model: BUILDER_MODEL,
     apiKey: BUILDER_PUBLIC_API_KEY,
@@ -26,21 +28,21 @@ export const useBuilderContent = routeLoader$(async ({ url }) => {
     },
   });
 
-  // Return the fetched content.
-  return builderContent;
+  // pass the api key into the default component below 
+  // because it does not use routeLoader 
+  return {
+    BUILDER_PUBLIC_API_KEY,
+    builderContent,
+  }
 });
 
-// Define a component that renders Builder content
-// using Qwik's Content component.
 export default component$(() => {
-  // Call the useBuilderContent function to get the content.
-  const content = useBuilderContent();
-  // Specify the content model, pass the fetched content,
-  // and provide the Public API Key
+  const { BUILDER_PUBLIC_API_KEY, builderContent } = useBuilderContent().value;
+
   return (
     <Content
       model={BUILDER_MODEL}
-      content={content.value}
+      content={builderContent}
       apiKey={BUILDER_PUBLIC_API_KEY}
     />
   );
