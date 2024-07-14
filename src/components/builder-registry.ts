@@ -1,5 +1,4 @@
 import type { RegisteredComponent } from "@builder.io/sdk-qwik";
-import Props, { Item } from "../routes/props";
 import Joke from "../routes/joke";
 import Root from "../root";
 import Routes from "../routes";
